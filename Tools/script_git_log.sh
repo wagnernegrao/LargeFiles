@@ -1,14 +1,17 @@
 #!/bin/bash
 
-INPUT=lista_de_diretorios.csv
+INPUT=lista_de_diretorios2.csv
 OLDIFS=$IFS
 IFS=','
 
 [ ! -f $INPUT ] && { echo "$INPUT file not found"; exit 99; }
-while read name dir
+while read project name dir
 do
-    git git log --oneline -M --stat --follow --pretty="%aI, %s, %an, %ae" -- $dir > /home/wagner/GitHub/files_txt/$name.txt
-	echo "Name : $name"
-	echo "DOB : $dir"
+    git git log --oneline -M --stat --follow --pretty="%aI, %s, %an, %ae" -- $dir > /home/wagner/GitHub/files_txt/$project-$name.txt
+	echo "Project: $project"
+    echo "Name : $name"
+	echo "Dir : $dir"
+
+    echo "Test: /home/wagner/GitHub/files_txt/$project-$name.txt"
 done < $INPUT
 IFS=$OLDIFS
