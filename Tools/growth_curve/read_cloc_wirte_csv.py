@@ -10,7 +10,7 @@ import pandas as pd
 
 
 def read_names():
-    filename_project = "/home/wagnernegrao/Dropbox/pasta/git_history/list_project.txt"
+    filename_project = "/home/wagnernegrao/GitHub/LargeFiles/Tools/growth_curve/project_list/list_project.txt"
 
     f = open(filename_project, 'r')
     file = f.readlines()
@@ -25,7 +25,8 @@ def read_names():
 
 
 def read_log(name):
-    filename = f"/home/wagnernegrao/Dropbox/pasta/git_history/log_project/{name}"
+    
+    filename = f"/home/wagnernegrao/Documents/dados_growth_curve/log_projeto/{name}"
 
     f = open(filename, 'r')
     file = f.readlines()
@@ -42,16 +43,18 @@ def read_log(name):
 
 
 def write_new_csv(project):
-    path = '/home/wagnernegrao/GitHub/git_history/projeto_cloc_final'
+    path = '/home/wagnernegrao/Documents/dados_growth_curve/dados_csv_cloc'
 
-    text = '/home/wagnernegrao/GitHub/git_history/projeto_cloc_final/'
+    text = '/home/wagnernegrao/Documents/dados_growth_curve/dados_csv_cloc/'
 
     filenames = glob.glob(path + '/*.csv')
 
     files = []
     flag = False
+
     for filename in filenames:
-        if(project == filename.replace(text, '').split('.')[0]):
+        if(project == filename.replace(text, '').split('*')[0]):
+            
             files.append(filename)
             flag = True
 
@@ -66,7 +69,7 @@ def write_new_csv(project):
             project_data = [[], [], []]
 
             for j in range(size):
-                data = files[i].replace(text, '').split('.')
+                data = files[i].replace(text, '').split('*')
                 # print(data)
                 project_data[0].append(data[0])
                 project_data[1].append(data[1])
@@ -78,7 +81,7 @@ def write_new_csv(project):
 
         if(len(dfs) != 0):
             df_ = pd.concat(dfs, ignore_index=True)
-            df_.to_csv(f'/home/wagnernegrao/GitHub/git_history/projetos_concatenados/{project}.csv', index=False)
+            df_.to_csv(f'/home/wagnernegrao/Documents/dados_growth_curve/projetos_concatenados/{project}.csv', index=False)
 
 
 name_list = read_names()  # retorna uma lista de nomes dos projetos
@@ -90,13 +93,13 @@ for name in name_list:
     log_list = read_log(name)
 
     project_name = name.replace('.txt', '')  # pega o nome do projeto
-
-    for i in range(0, len(log_list), 500):
+    
+    for i in range(0, len(log_list), 250):
         print(i)
         os.system(f"bash get_cloc.sh {project_name} {log_list[i]}")
 
     write_new_csv(project_name)
-
+    
 
 
 
