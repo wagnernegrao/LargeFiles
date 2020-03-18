@@ -4,55 +4,63 @@ import sys
 from pydriller import RepositoryMining
 import csv
 import codecs
+import time
 
 #verifica quais projetos iremos extrair, pois tenho mais projetos baixados do que os que vou analisar.
 #coloco numa lista para verificar se ele esta dentro dos projetos a serem analisados
 
 #os.chdir("/home/wagner/Documents/Projetos/projetos_baixados_final_git")
-
-filename1 = "/home/wagnernegrao/GitHub/git_history/lista_todos_projetos.txt"
+"""
+filename1 = "/home/wagnernegrao/GitHub/LargeFiles/Tools/generate_dataset/lista_nome_projetos.txt"
 f = open(filename1, 'r')
 file = f.readlines()
 
 pasta = ""
-vetPastas = []
+projetos = []
+"""
 
-
+"""
 for line in file:
     # print(line)
-    vetPastas.append(line.replace('\n', ''))
+    projetos.append(line.replace('\n', ''))
 
-print('-> ', vetPastas)
+print('-> ', projetos)
 
-#for file in glob.glob("*.txt"):
-#    pasta=file[0:len(file)-4]
-#    vetPastas+=[pasta]
+
+"""
+
 
 #resolvendo erro de codificação
 non_bmp_map = dict.fromkeys(range(0x10000, sys.maxunicode + 1), 0xfffd)
 
 #arquivo para a geracao dos relatórios
-os.chdir("/home/wagnernegrao/GitHub/git_history/resultados")
+
+os.chdir("/home/wagnernegrao/GitHub/LargeFiles/Tools/generate_dataset/resultados")
 #c = open("D:\Pesquisas\CSVSNovos\largeFiles[1].csv", "w", newline="")
 FILENAME = "resultado[18].csv"
 ENCODING = 'utf-8'
 
 #print('--> Passo 1')
 
+vetPastas = []
+projeto_arg = sys.argv[1]
+
+vetPastas.append(projeto_arg)
+
+print("\n\n\n =>>>>> Projeto: ", vetPastas)
+
+flag = True
+
 #comeca a escrita do csv
-with codecs.open(FILENAME, "w", ENCODING) as fp:
+with codecs.open(FILENAME, "a", ENCODING) as fp:
     writer = csv.writer(fp)
     linhas=[]
     arquivos=[]
     file_name2=""
     extensao=""
     grava=0
-    #primeira linha do csv
-    writer.writerow(["Hash", "File_Name", "Extension", "ContributorName", "ContributorEmail","CommitterName","Committeremail",
-                     "Date","addLines","excLines","linesOfCode","Complexity","changeType","Project_Name"])
+    
 
-
-    # pasta = 'coderVueJs\n'
 
     #print('--> Passo 2')
 
@@ -60,7 +68,7 @@ with codecs.open(FILENAME, "w", ENCODING) as fp:
     # /home/wagnernegrao/GitHub/projetos_github
     # /home/wagnernegrao/GitHub/projeto_git
     
-    for i in glob.glob("/home/wagnernegrao/GitHub/projetos_github/*"):
+    for i in glob.glob("/home/wagnernegrao/projetos_large_files/*"):
         print("i",i)
         for j in range(len(i)-1,-1,-1):
             #print('externa pasta: ', pasta)
@@ -70,6 +78,14 @@ with codecs.open(FILENAME, "w", ENCODING) as fp:
                 print("interna pasta:",pasta)
                 break
         if(pasta in vetPastas):
+
+            if(flag == True):
+
+                #primeira linha do csv
+                writer.writerow(["Hash", "File_Name", "Extension", "ContributorName", "ContributorEmail","CommitterName","Committeremail",
+                                 "Date","addLines","excLines","linesOfCode","Complexity","changeType","Project_Name"])
+                flag = False
+
             #print("Pasta no vetPastas: ", pasta)
             for commit in RepositoryMining(i).traverse_commits():
                 file_name2=""
@@ -89,8 +105,8 @@ with codecs.open(FILENAME, "w", ENCODING) as fp:
                                 #print("file:",file_name2)
                                 #print("extensao:",extensao)
                     if(commit.hash!=None and file_name2!=None and commit.author.name!=None and commit.author.email!=None and
-                           commit.committer.name!=None and commit.committer.email!=None and commit.author_date!=None
-                           and commit.project_name!=None and m.nloc!=None):
+                        commit.committer.name!=None and commit.committer.email!=None and commit.author_date!=None
+                        and commit.project_name!=None and m.nloc!=None):
                             # adicionando em uma lista, todas as LOC
                             if(m.nloc>=1848 and file_name2 not in arquivos and file_name2!=""):
                                 arquivos+=[file_name2]
@@ -125,12 +141,12 @@ with codecs.open(FILENAME, "w", ENCODING) as fp:
                     #print('arquivos: ', arquivos)
                     if file_name2 in arquivos:
                         if(commit.hash!=None and file_name2!=None and commit.author.name!=None and commit.author.email!=None and
-                           commit.committer.name!=None and commit.committer.email!=None and commit.author_date!=None and
-                           commit.project_name!=None and m.nloc!=None):
+                        commit.committer.name!=None and commit.committer.email!=None and commit.author_date!=None and
+                        commit.project_name!=None and m.nloc!=None):
                             print('--> ',commit.hash, file_name2, commit.author.name.translate(non_bmp_map), commit.author.email.translate(non_bmp_map),
-                                             commit.committer.name.translate(non_bmp_map), commit.committer.email.translate(non_bmp_map),
-                                             commit.author_date.strftime("%Y-%m-%d %H:%M:%S"), m.added,m.removed,m.nloc,m.complexity,m.change_type.name,
-                                              commit.project_name.translate(non_bmp_map))
+                                            commit.committer.name.translate(non_bmp_map), commit.committer.email.translate(non_bmp_map),
+                                            commit.author_date.strftime("%Y-%m-%d %H:%M:%S"), m.added,m.removed,m.nloc,m.complexity,m.change_type.name,
+                                            commit.project_name.translate(non_bmp_map))
 
                             commit_author_email=commit.author.email.translate(non_bmp_map)
                             commit_author_name=commit.author.name.translate(non_bmp_map)
@@ -166,14 +182,14 @@ with codecs.open(FILENAME, "w", ENCODING) as fp:
                             
                             print("==============================================================")
                             print(commit.hash, file_name2, extensao, commit_author_name, commit_author_email,
-                                             commit_committer_name, commit_committer_email,
-                                             commit.author_date.strftime("%Y-%m-%d %H:%M:%S"), 
-                                             m.added,m.removed,m.nloc,m.complexity,m.change_type.name,commit_project_name)
+                                            commit_committer_name, commit_committer_email,
+                                            commit.author_date.strftime("%Y-%m-%d %H:%M:%S"), 
+                                            m.added,m.removed,m.nloc,m.complexity,m.change_type.name,commit_project_name)
 
                             #escreve no cvs as informacoes dos arquivos que em algum momento atingiram 1048 linhas
                             writer.writerow([commit.hash, file_name2, extensao, commit_author_name, commit_author_email,
-                                             commit_committer_name, commit_committer_email,
-                                             commit.author_date.strftime("%Y-%m-%d %H:%M:%S"),
-                                             m.added,m.removed,m.nloc,m.complexity,m.change_type.name,commit_project_name])
+                                            commit_committer_name, commit_committer_email,
+                                            commit.author_date.strftime("%Y-%m-%d %H:%M:%S"),
+                                            m.added,m.removed,m.nloc,m.complexity,m.change_type.name,commit_project_name])
         else:
             print("A pasta não está no escopo -> ", pasta)
